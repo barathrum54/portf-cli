@@ -1,0 +1,71 @@
+{
+    "steps": [
+        {
+            "id": "Personal Information",
+            "title": "Contact Info",
+            "fields": [
+                {
+                    "label": "Full Name",
+                    "type": "text",
+                    "id": "fullName",
+                    "name": "fullName",
+                    "required": true
+                },
+                {
+                    "label": "Email Address",
+                    "type": "email",
+                    "id": "email",
+                    "name": "email",
+                    "required": true
+                },
+                {
+                    "label": "Phone Number",
+                    "type": "tel",
+                    "id": "phoneNumber",
+                    "name": "phoneNumber",
+                    "required": true
+                },
+                {
+                    "label": "Address",
+                    "type": "text",
+                    "id": "address",
+                    "name": "address",
+                    "required": true
+                },
+                {
+                    "label": "Date of Birth",
+                    "type": "date",
+                    "id": "dateOfBirth",
+                    "name": "dateOfBirth",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "id": "step2",
+            "title": "Profession",
+            "fields": [
+                {
+                    "label": "Job Title",
+                    "type": "text",
+                    "id": "jobTitle",
+                    "name": "jobTitle",
+                    "required": true
+                },
+                {
+                    "label": "Experience in Years",
+                    "type": "number",
+                    "id": "experienceYears",
+                    "name": "experienceYears",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "id": "step3",
+            "title": "Step 3",
+            "summaryTitle": "Summary",
+            "fields": []
+        }
+    ]
+}

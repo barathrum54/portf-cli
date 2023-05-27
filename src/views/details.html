@@ -1,0 +1,283 @@
+<div class="container mx-auto py-8">
+    <div class="flex justify-center">
+        <div class="w-1/2">
+            <div class="card mx-auto shadow p-5 ">
+                <div class="card-body">
+                    <div class="text-center text-xl font-bold mb-4"><span id="currentStep">1</span>/3</div>
+                    <form id="detailsForm">
+                        <!-- Steps will be dynamically generated here -->
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('detailsForm');
+        const currentStepText = document.getElementById('currentStep');
+        let currentStep = 1;
+        const steps = [];
+
+        function showCurrentStep() {
+            currentStepText.textContent = `${currentStep}`;
+        }
+
+        function showStep(stepNumber) {
+            steps.forEach((step, index) => {
+                if (stepNumber === index + 1) {
+                    step.classList.remove('hidden');
+                } else {
+                    step.classList.add('hidden');
+                }
+            });
+        }
+
+        function validateStep() {
+            const requiredInputs = Array.from(document.querySelectorAll('#step' + currentStep + ' [required]'));
+            requiredInputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    input.classList.add('error');
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+        }
+
+        function resetErrors() {
+            const requiredInputs = Array.from(document.querySelectorAll('#step' + currentStep + ' [required]'));
+            requiredInputs.forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+
+        function handleButtonClick(nextStep) {
+            validateStep();
+
+            if (nextStep > currentStep) {
+                const invalidInputs = document.querySelectorAll('#step' + currentStep + ' .error');
+                if (invalidInputs.length > 0) {
+                    return;
+                }
+            } else {
+                resetErrors();
+            }
+
+            if (nextStep === 3) {
+                // Retrieve form data
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+
+                // Display summary information
+                const summaryList = document.createElement('ul');
+                summaryList.id = 'summaryList';
+                summaryList.className = 'list-disc ml-8';
+
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const listItem = document.createElement('li');
+                        const label = form.querySelector(`label[for="${key}"]`).textContent.trim();
+                        listItem.textContent = `${label}: ${data[key]}`;
+                        summaryList.appendChild(listItem);
+                    }
+                }
+
+                const step3 = document.getElementById('step3');
+                step3.innerHTML = '';
+                step3.appendChild(document.createElement('h2')).textContent = 'Summary';
+                step3.appendChild(document.createElement('p')).textContent = 'Review your information:';
+                step3.appendChild(summaryList);
+
+                const backButton = createButton('previousButton3', 'button', 'Back', () => {
+                    handleButtonClick(2);
+                });
+
+                const submitButton = createButton('submitButton', 'submit', 'Submit', submitForm);
+
+
+                const buttonDiv = document.createElement('div');
+                buttonDiv.className = 'flex justify-between mt-8';
+                buttonDiv.append(backButton, submitButton);
+                step3.appendChild(buttonDiv);
+            }
+
+            currentStep = nextStep;
+            showCurrentStep();
+            showStep(currentStep);
+        }
+
+        function createButton(id, type, text, onClick) {
+            const button = document.createElement('button');
+            button.id = id;
+            button.type = type;
+            button.className = 'mx-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600';
+            if (text === 'Previous') {
+                button.className = 'mx-1 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600';
+            }
+
+            button.textContent = text;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+        function createStepElements(stepsData) {
+            for (let i = 0; i < stepsData.length; i++) {
+                const stepData = stepsData[i];
+
+                const stepDiv = document.createElement('div');
+                stepDiv.id = 'step' + (i + 1);
+                stepDiv.className = 'hidden';
+                if (i === 0) {
+                    stepDiv.classList.remove('hidden');
+                }
+
+                const title = document.createElement('h2');
+                title.textContent = stepData.title;
+                stepDiv.appendChild(title);
+
+                for (const fieldData of stepData.fields) {
+                    const label = document.createElement('label');
+                    label.htmlFor = fieldData.id;
+                    label.className = 'block font-medium';
+
+                    const labelText = fieldData.label + (fieldData.required ? ' *' : ''); // Eklenen kısım
+                    label.textContent = labelText;
+
+                    const input = document.createElement('input');
+                    input.type = fieldData.type;
+                    input.id = fieldData.id;
+                    input.name = fieldData.name;
+                    input.className = 'w-full border my-2 border-gray-300 rounded px-4 py-2 focus:outline-none';
+                    input.required = fieldData.required;
+
+                    stepDiv.appendChild(label);
+                    stepDiv.appendChild(input);
+                }
+
+                steps.push(stepDiv);
+                form.appendChild(stepDiv);
+            }
+
+            // Add buttons after creating all steps
+            addButtonsToSteps();
+        }
+
+        function addButtonsToSteps() {
+            const buttonsData = [
+                {
+                    "id": "nextButton1",
+                    "type": "button",
+                    "text": "Next",
+                    "nextStep": 2,
+                    "stepIndex": 0
+                },
+                {
+                    "id": "previousButton2",
+                    "type": "button",
+                    "text": "Previous",
+                    "nextStep": 1,
+                    "stepIndex": 1
+                },
+                {
+                    "id": "nextButton2",
+                    "type": "button",
+                    "text": "Next",
+                    "nextStep": 3,
+                    "stepIndex": 1
+                },
+                {
+                    "id": "previousButton3",
+                    "type": "button",
+                    "text": "Previous",
+                    "nextStep": 2,
+                    "stepIndex": 2
+                }
+            ];
+
+            buttonsData.forEach(buttonData => {
+                const button = createButton(buttonData.id, buttonData.type, buttonData.text, () => {
+                    handleButtonClick(buttonData.nextStep);
+                });
+
+                const stepIndex = buttonData.stepIndex;
+                const step = steps[stepIndex];
+
+                step.appendChild(button);
+            });
+        }
+        function fetchFormJson() {
+            fetch('/form.json')
+                .then(response => response.json())
+                .then(data => {
+                    createStepElements(data.steps);
+                    showCurrentStep();
+                })
+                .catch(error => {
+                    console.error('Error fetching form JSON:', error);
+                });
+        }
+
+        function submitForm(event) {
+            event.preventDefault(); // Formun submit olayını durdur
+
+            const formData = new FormData(form);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/submit');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                const responseData = JSON.parse(xhr.responseText);
+
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                    // Sonuç mesajını UI'da göster
+                    const resultMessage = document.createElement('p');
+                    resultMessage.textContent = xhr.responseText;
+                    resultMessage.classList.add('success-message'); // Özel bir CSS sınıfı ekleyebilirsiniz
+
+                    // Sonuç mesajını formun üzerine ekleyin
+                    form.appendChild(resultMessage);
+                } else {
+                    console.error('Error submitting form:', xhr.status);
+                    console.error(xhr.responseText);
+
+                    // Hata mesajını UI'da göster
+                    const errorMessage = document.createElement('p');
+                    errorMessage.textContent = 'An error occurred while submitting the form.';
+                    errorMessage.classList.add('error-message'); // Özel bir CSS sınıfı ekleyebilirsiniz
+
+                    // Hata mesajını formun üzerine ekleyin
+                    form.appendChild(errorMessage);
+                }
+            };
+            xhr.onerror = function () {
+                console.error('Error submitting form:', xhr.status);
+
+                // Hata mesajını UI'da göster
+                const errorMessage = document.createElement('p');
+                errorMessage.textContent = 'An error occurred while submitting the form.';
+                errorMessage.classList.add('error-message'); // Özel bir CSS sınıfı ekleyebilirsiniz
+
+                // Hata mesajını formun üzerine ekleyin
+                form.appendChild(errorMessage);
+            };
+
+            const data = {};
+
+            for (const [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            xhr.send(JSON.stringify(data));
+        }
+        fetchFormJson();
+
+
+    });
+
+
+</script>
+<style>
+    .error {
+        border-color: red;
+    }
+</style>
